@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #fcfcfd;
+  --accent: #6366f1;
+  --accent-secondary: #ec4899;
+  --glass: rgba(255, 255, 255, 0.9);
+  --border: #e2e8f0;
+}
+
+body {
+  background-color: var(--bg);
+  color: #0f172a;
+  font-family: var(--font-sans);
+}
+
+.analytics-grid {
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.pro-card {
+  background: white;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  border-radius: 1rem;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  letter-spacing: -0.05em;
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tab-active {
+  border-bottom: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
