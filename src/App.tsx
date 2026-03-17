@@ -55,8 +55,15 @@ export default function App() {
   const [reportError, setReportError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'advanced' | 'trends'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  // ── Load players from BigQuery on mount ───────────────────────────────────
+  // ── Debounce search input (500ms) ──────────────────────────────────────────
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // ── Load players from BigQuery — reruns when search changes ───────────────
   useEffect(() => {
     let cancelled = false;
 
@@ -64,7 +71,10 @@ export default function App() {
       setPlayersLoading(true);
       setPlayersError(null);
       try {
-        const data = await fetchPlayers({ limit: 50 });
+        const data = await fetchPlayers({
+          limit: 50,
+          search: debouncedSearch.trim() || undefined,
+        });
         if (!cancelled) setPlayers(data);
       } catch (err: any) {
         if (!cancelled) setPlayersError(err.message || 'Failed to load players');
@@ -75,19 +85,10 @@ export default function App() {
 
     loadPlayers();
     return () => { cancelled = true; };
-  }, []);
+  }, [debouncedSearch]);
 
-  // ── Client-side search filter ──────────────────────────────────────────────
-  const filteredPlayers = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return players;
-    return players.filter(
-      p =>
-        p.name.toLowerCase().includes(q) ||
-        p.team.toLowerCase().includes(q) ||
-        p.position.toLowerCase().includes(q)
-    );
-  }, [players, searchQuery]);
+  // filteredPlayers is just the server results — BigQuery handles the filtering
+  const filteredPlayers = players;
 
   // ── Player selection / comparison ──────────────────────────────────────────
   const runReport = useCallback(async (primary: Player, compare?: Player) => {
@@ -172,8 +173,9 @@ export default function App() {
                 playersError ? "bg-red-400" :
                 "bg-emerald-500"
               )} />
-              {playersLoading ? 'Connecting to BigQuery…' :
+              {playersLoading ? (debouncedSearch ? 'Searching BigQuery…' : 'Connecting to BigQuery…') :
                playersError ? 'BigQuery error' :
+               debouncedSearch ? `${players.length} results for "${debouncedSearch}"` :
                `Live Data Feed · ${players.length} players`}
             </div>
           </div>
@@ -187,6 +189,9 @@ export default function App() {
                 onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64"
               />
+              {playersLoading && debouncedSearch && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400 animate-spin" />
+              )}
             </div>
             <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-full"><Info className="w-5 h-5" /></button>
           </div>
@@ -263,9 +268,9 @@ export default function App() {
                 )}
               </div>
 
-              {filteredPlayers.length === 0 ? (
+              {!playersLoading && filteredPlayers.length === 0 ? (
                 <div className="text-center py-12 text-slate-400 text-sm">
-                  No players match "{searchQuery}"
+                  No players found for "{debouncedSearch}" in BigQuery
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
