@@ -9,6 +9,10 @@ RUN npm ci
 # Copy source files
 COPY . .
 
+# Accept Gemini API key at build time so Vite can bake it into the bundle
+ARG VITE_GEMINI_API_KEY
+ENV VITE_GEMINI_API_KEY=$VITE_GEMINI_API_KEY
+
 # Build the React frontend
 RUN npm run build
 
