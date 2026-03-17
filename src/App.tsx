@@ -215,6 +215,54 @@ export default function App() {
           {/* ── Player Selection Grid ── */}
           {!playersLoading && !playersError && (
             <>
+              {/* Step-by-step guidance banner */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className={cn(
+                  "flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border text-sm font-semibold transition-all",
+                  !selectedPlayer
+                    ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200"
+                    : "bg-white border-slate-200 text-slate-400 line-through"
+                )}>
+                  <span className={cn(
+                    "w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0",
+                    !selectedPlayer ? "bg-white text-indigo-600" : "bg-slate-100 text-slate-400"
+                  )}>1</span>
+                  Click a player to analyse
+                </div>
+
+                <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+
+                <div className={cn(
+                  "flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border text-sm font-semibold transition-all",
+                  selectedPlayer && !comparePlayer
+                    ? "bg-pink-500 border-pink-500 text-white shadow-md shadow-pink-200 animate-pulse"
+                    : comparePlayer
+                    ? "bg-white border-slate-200 text-slate-400 line-through"
+                    : "bg-white border-slate-200 text-slate-400"
+                )}>
+                  <span className={cn(
+                    "w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0",
+                    selectedPlayer && !comparePlayer ? "bg-white text-pink-500" : "bg-slate-100 text-slate-400"
+                  )}>2</span>
+                  Click another player to compare
+                </div>
+
+                {comparePlayer && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-sm font-semibold text-emerald-700"
+                  >
+                    <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    Comparing {selectedPlayer?.name.split(' ').pop()} vs {comparePlayer.name.split(' ').pop()}
+                  </motion.div>
+                )}
+              </div>
+
               {filteredPlayers.length === 0 ? (
                 <div className="text-center py-12 text-slate-400 text-sm">
                   No players match "{searchQuery}"
@@ -526,7 +574,7 @@ export default function App() {
                                 </div>
                               </div>
                               <p className="text-[10px] text-slate-400 text-center">
-                                Check that <span className="font-mono text-slate-500">VITE_GEMINI_API_KEY</span> is set in <span className="font-mono text-slate-500">.env.local</span>
+                                Check that <span className="font-mono text-slate-500">GEMINI_API_KEY</span> is set on the server
                               </p>
                             </div>
                           ) : report ? (

@@ -14,7 +14,7 @@
 
 ## 🔗 Live Demo
 
-👉 **[View Live App](https://soccer-scouting-api-xxxx-uc.a.run.app)**
+👉 **[View Live App](https://soccer-scouting-api-783084248781.us-central1.run.app/)**
 
 ---
 
@@ -262,7 +262,7 @@ The app queries the **FIFA 19 Complete Player Dataset** stored in Google BigQuer
 ## 🧠 About the Developer
 
 **Iyanuoluwa (Gabriel) Aboyeji**
-Senior Modelling Specialist | Actuarial Analyst | Data Scientist
+Modelling Specialist | Actuarial Analyst | Data Scientist
 
 - 8+ years experience in data science, insurance analytics, and actuarial modelling
 - Expertise in Python, R, SAS, SQL, and cloud data platforms
