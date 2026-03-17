@@ -125,7 +125,7 @@ The architecture mirrors a real-world sports analytics stack: a cloud data wareh
 
 | Feature | Detail |
 |---|---|
-| **Live BigQuery Feed** | Queries `Player_Analyzer.Player_profiles` on demand — top 50 players by Overall rating, with search filtering pushed to SQL |
+| **Live BigQuery Feed** | Queries `Player_Analyzer.Player_profiles` on demand — shows top 50 players by Overall rating, with search filtering  for other players pushed to SQL |
 | **Player Search** | Real-time client-side filter across name, club, and position |
 | **Club Crests & Flags** | Club logo overlaid on each player card; nationality flag in player detail header |
 | **Percentile Bar Chart** | Horizontal bars comparing up to 2 players across 6 key metrics |
