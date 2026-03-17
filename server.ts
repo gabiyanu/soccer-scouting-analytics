@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 import express from 'express';
 import { BigQuery } from '@google-cloud/bigquery';
+import { GoogleGenAI, Type } from '@google/genai';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -147,6 +148,74 @@ app.get('/api/players', async (req, res) => {
       error: 'Failed to fetch player data from BigQuery',
       details: error.message,
     });
+  }
+});
+
+// ── POST /api/scouting-report ─────────────────────────────────────────────────
+app.use(express.json());
+app.post('/api/scouting-report', async (req, res) => {
+  try {
+    const { primary, compare } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+      return;
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    const isComparison = !!compare;
+
+    const prompt = isComparison
+      ? `You are an elite football scout. Compare these two players and provide a detailed head-to-head scouting report.
+         Player 1 — ${primary.name}: ${JSON.stringify(primary.data)}
+         Player 2 — ${compare.name}: ${JSON.stringify(compare.data)}
+         Analyse both players on technical ability, physical traits, and tactical intelligence.
+         For potentialRating and potentialTimeline, assess ${primary.name}.
+         For bestFormations and idealRole, consider which systems suit ${primary.name} best.
+         For comparisonVerdict, clearly state who wins the head-to-head and why.
+         For keyDifference, name the single metric or quality that most separates them.`
+      : `You are an elite football scout. Provide a detailed scouting report for this player.
+         Player — ${primary.name}: ${JSON.stringify(primary.data)}
+         Analyse technical ability, physical traits, and tactical intelligence.
+         For comparisonVerdict, describe their standing among players of their position globally.
+         For keyDifference, name their single most outstanding attribute.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            summary:              { type: Type.STRING },
+            strengths:            { type: Type.ARRAY, items: { type: Type.STRING } },
+            weaknesses:           { type: Type.ARRAY, items: { type: Type.STRING } },
+            potentialRating:      { type: Type.STRING },
+            potentialTimeline:    { type: Type.STRING },
+            potentialDescription: { type: Type.STRING },
+            bestFormations:       { type: Type.ARRAY, items: { type: Type.STRING } },
+            idealRole:            { type: Type.STRING },
+            tacticalDescription:  { type: Type.STRING },
+            playerComparison:     { type: Type.STRING },
+            comparisonVerdict:    { type: Type.STRING },
+            keyDifference:        { type: Type.STRING },
+          },
+          required: [
+            'summary', 'strengths', 'weaknesses',
+            'potentialRating', 'potentialTimeline', 'potentialDescription',
+            'bestFormations', 'idealRole', 'tacticalDescription',
+            'playerComparison', 'comparisonVerdict', 'keyDifference',
+          ],
+        },
+      },
+    });
+
+    if (!response.text) throw new Error('Gemini returned an empty response.');
+    res.json(JSON.parse(response.text));
+  } catch (error: any) {
+    console.error('Gemini error:', error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
